@@ -1,18 +1,19 @@
-import os
 import requests
+from bs4 import BeautifulSoup
+import os
 
-def notify_slack(message: str):
-    webhook_url = os.getenv("SLACK_WEBHOOK_URL")
-    if not webhook_url:
-        print("Slack Webhook URLが環境変数に設定されていません")
-        return
+# 対象URL（変更不要）
+URL = "https://www.etix.com/kketix/e/2009653"
 
-    payload = {"text": message}
-    response = requests.post(webhook_url, json=payload)
+# チェックする日（例：22日）
+target_date_str = "22日"
 
-    print(f"Slack送信ステータス: {response.status_code}")
-    if response.status_code != 200:
-        print(f"レスポンス内容: {response.text}")
+# Slack Webhook URL（GitHub Actions の Secrets から取得）
+SLACK_WEBHOOK_URL = os.environ.get("SLACK_WEBHOOK_URL")
 
-# テスト送信メッセージ
-notify_slack("✅ GitHub Actions からの Slack 通知テストです！")
+# Slack通知関数
+def notify_slack(message):
+    if SLACK_WEBHOOK_URL:
+        requests.post(SLACK_WEBHOOK_URL, json={"text": message})
+
+#
