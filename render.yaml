@@ -1,6 +1,0 @@
-services:
-  - type: web
-    name: etix-check
-    env: python
-    buildCommand: ""
-    startCommand: "python check.py"
