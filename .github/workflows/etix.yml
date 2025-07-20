@@ -1,0 +1,25 @@
+name: Check etix availability
+
+on:
+  schedule:
+    - cron: '*/5 * * * *'  # 5分ごとに実行（UTC）
+  workflow_dispatch:  # 手動実行も可能
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: pip install requests beautifulsoup4
+
+      - name: Run script
+        run: python main.py
