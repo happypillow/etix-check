@@ -1,27 +1,31 @@
-name: check_etix
+name: Monitor Ticket Every 5 Min
 
 on:
   schedule:
-    - cron: '0 * * * *' # 毎時0分に実行（JSTで+9時間ずらして調整）
-  workflow_dispatch:
+    - cron: '*/5 * * * *'  # ← 5分ごとに実行
+  workflow_dispatch:        # 手動実行も可能
 
 jobs:
   check:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Check out repository
-        uses: actions/checkout@v3
+      - uses: actions/checkout@v3
 
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: '3.10'
+          python-version: '3.11'
 
       - name: Install dependencies
-        run: pip install -r requirements.txt
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y chromium-browser chromium-chromedriver
+          pip install -r requirements.txt
+
+      - name: Set CHROME env variables
+        run: |
+          echo "CHROME_BIN=/usr/bin/chromium-browser" >> $GITHUB_ENV
+          echo "CHROMEDRIVER_PATH=/usr/bin/chromedriver" >> $GITHUB_ENV
 
       - name: Run script
         run: python main.py
-        env:
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
