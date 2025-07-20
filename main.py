@@ -1,19 +1,50 @@
-import requests
-from bs4 import BeautifulSoup
 import os
+import requests
+from selenium import webdriver
+from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.common.by import By
+import time
 
-# 対象URL（変更不要）
-URL = "https://www.etix.com/kketix/e/2009653"
-
-# チェックする日（例：22日）
-target_date_str = "22日"
-
-# Slack Webhook URL（GitHub Actions の Secrets から取得）
-SLACK_WEBHOOK_URL = os.environ.get("SLACK_WEBHOOK_URL")
+# チェック対象URL（22日10時など）
+URL = "https://www.etix.com/kketix/online/performanceReserve.jsp?performance_id=6017828&language_cache=ja"
+TARGET_TIME = "10:00"
 
 # Slack通知関数
-def notify_slack(message):
-    if SLACK_WEBHOOK_URL:
-        requests.post(SLACK_WEBHOOK_URL, json={"text": message})
+def notify_to_slack(message):
+    webhook_url = os.getenv("SLACK_WEBHOOK_URL")
+    if not webhook_url:
+        print("SLACK_WEBHOOK_URL が設定されていません")
+        return
+    payload = {"text": message}
+    requests.post(webhook_url, json=payload)
 
-#
+# Chrome設定
+options = Options()
+options.add_argument("--headless")
+options.add_argument("--no-sandbox")
+options.add_argument("--disable-dev-shm-usage")
+
+# ドライバ起動
+driver = webdriver.Chrome(options=options)
+driver.get(URL)
+time.sleep(2)  # JS読み込み待ち
+
+try:
+    # プルダウン展開
+    dropdown = driver.find_element(By.CSS_SELECTOR, "select")
+    options = dropdown.find_elements(By.TAG_NAME, "option")
+
+    for option in options:
+        text = option.text.strip()
+        if TARGET_TIME in text and "現在の残数です" not in text:
+            notify_to_slack(f"✅【空きあり】{TARGET_TIME} の予約が可能になりました！\n{URL}")
+            print("空きあり！通知しました。")
+            break
+    else:
+        print("まだ空いていません。")
+
+except Exception as e:
+    notify_to_slack(f"❌ エラーが発生しました: {str(e)}")
+    print(f"エラー: {str(e)}")
+
+driver.quit()
