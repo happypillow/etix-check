@@ -9,7 +9,7 @@ URL = "https://www.etix.com/kketix/e/2009653"
 TARGET_DATE = "21"
 
 # Slack Webhook URL（自分のURLに置き換えてください）
-SLACK_WEBHOOK_URL = "https://hooks.slack.com/services/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"
+SLACK_WEBHOOK_URL = "https://hooks.slack.com/services/"
 
 # Slack通知関数
 def notify_slack(message):
