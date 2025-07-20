@@ -1,10 +1,9 @@
-# .github/workflows/check_etix.yml
 name: check
 
 on:
   workflow_dispatch:
   schedule:
-    - cron: '0 1 * * *'
+    - cron: '0 1 * * *'  # 毎日10:00 JST（1:00 UTC）
 
 jobs:
   check_etix:
@@ -24,5 +23,5 @@ jobs:
 
       - name: Run script
         env:
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}  # ← これが必要！
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
         run: python check_etix_ticket.py
